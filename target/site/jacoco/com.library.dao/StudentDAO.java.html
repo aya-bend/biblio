@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StudentDAO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">mon-projet</a> &gt; <a href="index.source.html" class="el_package">com.library.dao</a> &gt; <span class="el_source">StudentDAO.java</span></div><h1>StudentDAO.java</h1><pre class="source lang-java linenums">package com.library.dao;
+
+import com.library.model.Student;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class StudentDAO {
+    private final Connection connection;
+<span class="fc" id="L12">    private static final Logger LOGGER = Logger.getLogger(StudentDAO.class.getName());</span>
+
+<span class="fc" id="L14">    public StudentDAO(Connection connection) {</span>
+<span class="fc" id="L15">        this.connection = connection;</span>
+<span class="fc" id="L16">    }</span>
+
+    public void addStudent(Student student) {
+<span class="fc" id="L19">        String query = &quot;INSERT INTO students (id,name,email) VALUES (?,?,?)&quot;;</span>
+<span class="fc" id="L20">        try (PreparedStatement statement = connection.prepareStatement(query)) {</span>
+<span class="fc" id="L21">            statement.setInt(1, student.getId());</span>
+<span class="fc" id="L22">            statement.setString(2, student.getName());</span>
+<span class="fc" id="L23">            statement.setString(3, student.getEmail());</span>
+<span class="fc" id="L24">            statement.executeUpdate();</span>
+<span class="nc" id="L25">        } catch (SQLException e) {</span>
+<span class="nc" id="L26">            LOGGER.log(Level.SEVERE, &quot;Erreur lors de l'ajout de l'étudiant&quot;, e);</span>
+<span class="fc" id="L27">        }</span>
+<span class="fc" id="L28">    }</span>
+
+    public Student getStudentById(int id) {
+<span class="fc" id="L31">        String query = &quot;SELECT * FROM students WHERE id = ?&quot;;</span>
+<span class="fc" id="L32">        try (PreparedStatement statement = connection.prepareStatement(query)) {</span>
+<span class="fc" id="L33">            statement.setInt(1, id);</span>
+<span class="fc" id="L34">            try (ResultSet resultSet = statement.executeQuery()) {</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">                if (resultSet.next()) {</span>
+<span class="fc" id="L36">                    return new Student(</span>
+<span class="fc" id="L37">                            resultSet.getInt(&quot;id&quot;),</span>
+<span class="fc" id="L38">                            resultSet.getString(&quot;name&quot;),</span>
+<span class="fc" id="L39">                            resultSet.getString(&quot;email&quot;)</span>
+                    );
+                }
+<span class="fc" id="L42">                return null; // Retourne null si l'étudiant n'existe pas</span>
+<span class="pc bpc" id="L43" title="1 of 2 branches missed.">            }</span>
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">        } catch (SQLException e) {</span>
+<span class="nc" id="L45">            LOGGER.log(Level.SEVERE, &quot;Erreur lors de la récupération de l'étudiant&quot;, e);</span>
+<span class="nc" id="L46">            return null;</span>
+        }
+    }
+
+    public List&lt;Student&gt; getAllStudents() {
+<span class="fc" id="L51">        List&lt;Student&gt; students = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L52">        String query = &quot;SELECT * FROM students&quot;;</span>
+<span class="fc" id="L53">        try (PreparedStatement statement = connection.prepareStatement(query);</span>
+<span class="fc" id="L54">             ResultSet resultSet = statement.executeQuery()) {</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">            while (resultSet.next()) {</span>
+<span class="fc" id="L56">                students.add(new Student(resultSet.getInt(&quot;id&quot;),resultSet.getString(&quot;name&quot;), resultSet.getString(&quot;email&quot;)));</span>
+            }
+<span class="nc" id="L58">        } catch (SQLException e) {</span>
+<span class="nc" id="L59">            LOGGER.log(Level.SEVERE, &quot;Erreur lors de la récupération des étudiants&quot;, e);</span>
+<span class="fc" id="L60">        }</span>
+<span class="fc" id="L61">        return students;</span>
+    }
+
+    public void updateStudent(Student student) {
+<span class="fc" id="L65">        String query = &quot;UPDATE students SET email = ?, name = ? WHERE id = ?&quot;;</span>
+<span class="fc" id="L66">        try (PreparedStatement statement = connection.prepareStatement(query)) {</span>
+<span class="fc" id="L67">            statement.setString(1, student.getEmail());</span>
+<span class="fc" id="L68">            statement.setString(2, student.getName());</span>
+<span class="fc" id="L69">            statement.setInt(3, student.getId());</span>
+<span class="fc" id="L70">            statement.executeUpdate();</span>
+<span class="nc" id="L71">        } catch (SQLException e) {</span>
+<span class="nc" id="L72">            LOGGER.log(Level.SEVERE, &quot;Erreur lors de la mise à jour de l'étudiant&quot;, e);</span>
+<span class="fc" id="L73">        }</span>
+<span class="fc" id="L74">    }</span>
+
+    public void deleteStudent(int id) {
+<span class="fc" id="L77">        String query = &quot;DELETE FROM students WHERE id = ?&quot;;</span>
+<span class="fc" id="L78">        try (PreparedStatement statement = connection.prepareStatement(query)) {</span>
+<span class="fc" id="L79">            statement.setInt(1, id);</span>
+<span class="fc" id="L80">            statement.executeUpdate();</span>
+<span class="nc" id="L81">        } catch (SQLException e) {</span>
+<span class="nc" id="L82">            LOGGER.log(Level.SEVERE, &quot;Erreur lors de la suppression de l'étudiant&quot;, e);</span>
+<span class="fc" id="L83">        }</span>
+<span class="fc" id="L84">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
