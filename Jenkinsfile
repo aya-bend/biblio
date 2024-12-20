@@ -1,25 +1,26 @@
 pipeline {
     agent any
     environment {
-        SONAR_PROJECT_KEY = 'gestionBib'
-        SONAR_SCANNER_HOME = tool 'SonarQubeScanner'
-
+        PATH = "C:/Program Files/Git/cmd;${env.PATH}"
     }
     tools {
         maven 'Maven'
         jdk 'JDK17'
     }
     stages {
-        stage('Checkout') {
+        stage('Clone') {
             steps {
-
-               checkout scm
-
+                bat "git clone https://github.com/aya-bend/biblio.git"
+            }
+        }
+        stage('Pull') {
+            steps {
+                bat "git pull"
             }
         }
         stage('Build') {
             steps {
-                sh 'mvn clean compile'
+                bat 'mvn clean compile'
             }
         }
         stage('Test') {
@@ -27,40 +28,9 @@ pipeline {
                 sh 'mvn test'
             }
         }
-
-         stage('Quality Analysis') {
-
-
-                     steps {
-                                         withCredentials([string(credentialsId: 'gestionBib_token', variable: 'SONAR_TOKEN')]) {
-
-                                                 withSonarQubeEnv('SonarQube') {
-                                                         sh """
-                                      mvn sonar:sonar \
-                                     -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                                     -Dsonar.login=${SONAR_TOKEN}
-                                     """
-                                                 }
-                                         }
-                                 }
-                 }
-
-        stage('Deploy') {
+        stage('Run') {
             steps {
-                echo 'Déploiement simulé réussi'
+                sh 'mvn exec:java'
             }
         }
-    }
-    post {
-        success {
-            emailext to: 'bendaoude.aya@gmail.com',
-                subject: 'Build Success',
-                body: 'Le build a été complété avec succès.'
-        }
-        failure {
-            emailext to: 'bendaoude.aya@gmail.com',
-                subject: 'Build Failed',
-                body: 'Le build a échoué.'
-        }
-    }
 }

@@ -64,14 +64,6 @@
         </plugins>
     </build>
 
-    <properties>
-        <sonar.host.url>http://localhost:9000</sonar.host.url>
-        <sonar.login>xxxxxxxxxxxxxx</sonar.login>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <java.version>17</java.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
